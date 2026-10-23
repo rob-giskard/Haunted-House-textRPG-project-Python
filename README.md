@@ -17,6 +17,11 @@ You need Python 3 and nothing else (only the standard library is used).
 python HauntedHouse.py
 ```
 
+Or build **`HauntedHouse.exe`**, a standalone Windows version that needs nothing installed
+(it carries its own Python). It is not committed to git, so build it yourself with
+`tools/game-exe/build.sh` (see *Project structure*). The first start takes a few seconds
+while it unpacks Python into `%LOCALAPPDATA%\HauntedHouse`; after that it starts instantly.
+
 Item colors use ANSI codes. They work in Windows Terminal, the classic Windows console,
 macOS and Linux terminals.
 
@@ -223,11 +228,14 @@ lead down south into the Moldy hallway, and the **Secret stairs** lead east into
 | `walkthrough.txt` | seeded command list that completes 100% of the game |
 | `autoplay.py` | plays the game from a walkthrough file |
 | `HauntedHouseAutoplay.exe` | Windows launcher for `autoplay.py` (needs Python 3 installed) |
+| `HauntedHouse.exe` | standalone Windows build of the game with Python bundled (git-ignored, ~10 MB) |
+| `tools/game-exe/` | Go source of `HauntedHouse.exe` and `build.sh`, which downloads a portable Windows Python, trims it, bundles it with the current `HauntedHouse.py` and builds the exe (needs Go, curl and Python; on Windows run it from Git Bash). Rebuild after every game change |
 | `tools/autoplay-exe/` | Go source of the launcher; rebuild with `GOOS=windows GOARCH=amd64 go build -o ../../HauntedHouseAutoplay.exe` after copying the latest `autoplay.py` into that folder |
 
 ## Changelog
 
 **Latest**
+- Standalone `HauntedHouse.exe` build (bundles its own Python; git-ignored)
 - 100% walkthrough (`walkthrough.txt`) and an autoplay tool (`HauntedHouseAutoplay.exe` / `autoplay.py`)
 - Game over screen with final stats; the game waits for Enter instead of closing
 - Item colors actually display (they used to print the word "yellow" next to the item)
