@@ -1,0 +1,189 @@
+# Haunted House - 100% walkthrough
+#
+# Visits all 25 rooms, searches every object, finds all 4 keys, opens the Safe,
+# completes all 3 good deeds and escapes alive.
+#
+# The game is random (traps, monsters, where the keys are hidden), so this list only
+# works together with the seed below. Run it with HauntedHouseAutoplay.exe, which
+# fixes the seed and types the commands for you. Typing these by hand into a normal
+# game will not work, because that game rolls different dice.
+#
+# Format: one command per line, everything after # is a comment.
+
+seed: 188
+Ghost Hunter  # your name
+p             # search the Painting of lady and lord Durst
+w             # search the Wardrobe
+r             # leave the Foyer
+n             # go north to the Grand hall
+w             # search the Weapon cabinet
+i             # search the Iron lockbox
+a             # search the Antique vase
+r             # leave the Grand hall
+n             # go north to the Short hallway
+o             # search the Ornate picture frame
+r             # leave the Short hallway
+n             # go north to the Kitchen
+s             # pick the Shotgun - ambushed by Striga
+f             # fight
+s             # search the Shabby cupboard
+w             # search the Wooden box
+k             # search the Kitchen counter
+t             # search the Toolbox
+r             # leave the Kitchen
+n             # go north to the Long hallway
+p             # search the Painting of a landscape
+s             # search the Secret stash
+b             # open the backpack
+b             # use a Bandage
+b             # open the backpack
+b             # use a Bandage
+f             # search the First aid lockbox
+r             # leave the Long hallway
+e             # go east to the Stairs
+r             # leave the Stairs
+s             # go south to the Moldy hallway
+b             # open the backpack
+a             # drink an Antidote (poisoned)
+r             # leave the Moldy hallway
+s             # go south to the Gallery NE
+h             # search the Huge cocoon
+s             # search the Small cocoon
+w             # search the Web-covered display case
+l             # search the Loose brick
+r             # leave the Gallery NE
+s             # go south to the Gallery E
+s             # search the Small cocoon
+r             # leave the Gallery E
+s             # go south to the Gallery SE
+r             # leave the Gallery SE
+w             # go west to the Gallery S
+w             # search the Web-covered shoe box
+r             # leave the Gallery S
+w             # go west to the Gallery SW
+d             # search the Destroyed display cabinet
+r             # leave the Gallery SW
+n             # go north to the Gallery W
+s             # pick the Shotgun - ambushed by Promiscuous python
+f             # fight
+r             # leave the Gallery W
+n             # go north to the Gallery NW
+r             # leave the Gallery NW
+n             # go north to the Childrens bedroom - complete the good deed
+t             # search the Toy chest
+s             # search the Shoebox
+r             # leave the Childrens bedroom
+s             # go south to the Gallery NW
+r             # leave the Gallery NW
+e             # go east to the Gallery N
+d             # search the Discarded holster
+r             # leave the Gallery N
+e             # go east to the Gallery NE
+r             # leave the Gallery NE
+s             # go south to the Gallery E
+r             # leave the Gallery E
+e             # go east to the Study
+p             # search the Painting of a city panorama
+b             # open the backpack
+b             # use a Bandage
+i             # search the Iron lockbox
+s             # search the Shelves
+r             # leave the Study
+e             # go east to the Vault
+o             # search the Old pouch
+r             # leave the Vault
+n             # go north to the Safe - unlock it with the 4 keys
+g             # search the Glass display case
+o             # search the Ornate display case
+t             # search the Treasure chest
+s             # search the Stone coffin
+r             # leave the Safe
+w             # go west to the Secret stairs
+h             # search the Hidden stash
+r             # leave the Secret stairs
+w             # go west to the Laboratory - pry the door open with the Crowbar
+w             # search the Wooden box
+l             # search the Leather case
+b             # open the backpack
+b             # use a Bandage
+b             # open the backpack
+b             # use a Bandage
+s             # search the Shelf
+r             # leave the Laboratory
+w             # go west to the Short hallway
+s             # pick the Shotgun - ambushed by Poltergeist
+r             # leave the Short hallway
+s             # go south to the Grand hall
+r             # leave the Grand hall
+w             # go west to the Drawing room
+p             # search the Porcelain teapot
+c             # search the Cigar box
+r             # leave the Drawing room
+w             # go west to the Ball room - pry the door open with the Crowbar
+o             # search the Old piano
+p             # search the Pile of bones
+r             # leave the Ball room
+e             # go east to the Drawing room
+r             # leave the Drawing room
+e             # go east to the Grand hall
+r             # leave the Grand hall
+n             # go north to the Short hallway
+r             # leave the Short hallway
+n             # go north to the Kitchen
+r             # leave the Kitchen
+n             # go north to the Long hallway
+r             # leave the Long hallway
+w             # go west to the Storage room - complete the good deed
+o             # search the Old backpack
+b             # open the backpack
+b             # use a Bandage
+r             # leave the Storage room
+e             # go east to the Long hallway
+r             # leave the Long hallway
+e             # go east to the Stairs
+r             # leave the Stairs
+s             # go south to the Moldy hallway
+s             # pick the Shotgun - ambushed by Sad vampire
+b             # open the backpack
+a             # drink an Antidote (poisoned)
+b             # open the backpack
+b             # use a Bandage
+r             # leave the Moldy hallway
+s             # go south to the Gallery NE
+r             # leave the Gallery NE
+w             # go west to the Gallery N
+r             # leave the Gallery N
+w             # go west to the Gallery NW
+r             # leave the Gallery NW
+s             # go south to the Gallery W
+r             # leave the Gallery W
+w             # go west to the Master bedroom - complete the good deed
+r             # leave the Master bedroom
+e             # go east to the Gallery W
+r             # leave the Gallery W
+n             # go north to the Gallery NW
+s             # pick the Shotgun - ambushed by Gelatinous cube
+f             # fight
+r             # leave the Gallery NW
+e             # go east to the Gallery N
+r             # leave the Gallery N
+e             # go east to the Gallery NE
+r             # leave the Gallery NE
+n             # go north to the Moldy hallway
+b             # open the backpack
+a             # drink an Antidote (poisoned)
+r             # leave the Moldy hallway
+n             # go north to the Stairs
+r             # leave the Stairs
+w             # go west to the Long hallway
+r             # leave the Long hallway
+s             # go south to the Kitchen
+r             # leave the Kitchen
+s             # go south to the Short hallway
+r             # leave the Short hallway
+s             # go south to the Grand hall
+r             # leave the Grand hall
+s             # go south to the Foyer
+r             # leave the Foyer
+s             # head for the front door
+y             # leave the house - everything is done

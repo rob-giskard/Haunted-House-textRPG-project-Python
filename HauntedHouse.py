@@ -1,5 +1,12 @@
+import os
 import random
-import sys
+
+#ANSI COLORS
+#os.system('') switches on ANSI color support in the classic Windows console
+os.system('')
+COLORS = {'yellow':'\033[93m', 'blue':'\033[94m', 'red':'\033[91m'}
+def colored(text, color):
+    return COLORS[color] + text + '\033[0m'
 
 
 
@@ -32,12 +39,13 @@ class Entity:
         self.location = 'Foyer'
         self.fighting = 0
         self.deeds = 0
+        self.kills = 0
 
     def __str__(self):
         return ('This ' + self.name + ' has ' + str(self.HP) + ' HP and '+ str(self.AC) + ' AC.') 
     
     def rolls_initiative(self):
-        initiative = random.randint(1,21)
+        initiative = random.randint(1,20)
         print (' * ' + self.name + ' rolls for initiative, gets ' + str(initiative) + '. *') 
         return initiative 
         
@@ -130,7 +138,7 @@ class Player(Entity):
             print ('\n * ' + attacker_name + ' attacks but you avoid the strike. *')
     
     def rolls_initiative(self):
-        initiative = random.randint(1,21)
+        initiative = random.randint(1,20)
         print ('\n * ' + self.name + ' rolls for initiative: ' + str(initiative) + '. *') 
         return initiative 
    
@@ -138,6 +146,7 @@ class Player(Entity):
         #compares backpack contents against a list of usable items
         #modifies has_usables class attribute
         usables = ['Bandage','Flashbang','Hardtack','Antidote','Mysterious glass vial']
+        self.has_usables = 0
         for i in usables:    
             if i in backpack.contents:
                 self.has_usables = 1
@@ -154,7 +163,7 @@ class Player(Entity):
     def uses_item(self):
         item_to_use = ''
         while item_to_use == '':
-            item_to_use = input('\npSelect item to use, check PST or Close the backpack.').lower()
+            item_to_use = input('\nSelect item to use, check PST or Close the backpack.').lower()
         if item_to_use.startswith('b') and 'Bandage' in backpack.contents:
             self.HP += random.randint(6,12)
             if self.HP > self.maxHP:
@@ -179,10 +188,10 @@ class Player(Entity):
                 print('\n    The antidote is working. You feel better immediately.')
             else: print('\n    The liquid tastes funny but does nothing.')
             backpack.remove('Antidote')
-        elif item_to_use.startswith('m'):
+        elif item_to_use.startswith('m') and 'Mysterious glass vial' in backpack.contents:
             print('\n    You drink the unknown liquid and taste death. Everything fades to black.')
             backpack.remove('Mysterious glass vial')
-            player.alive, player.in_house = 0,0
+            player.alive, player.in_house, player.in_room, player.fighting = 0,0,0,0
         elif item_to_use.startswith('p'):
             player.checks_stats()
         elif item_to_use.startswith('c'):
@@ -274,6 +283,16 @@ class Player(Entity):
 
 key_types = ['Brass key', 'Silver key', 'Copper key', 'Iron key']
 
+#each creature appears at most once per game, except the Generic villain
+creatures = ['Groggy ghost','Blob of goo','Ghastly ghoul','Poltergeist',
+             'Panting pirate','Sad vampire','Lidless eye','Moaning monster',
+             'Chucking woodchuck','Batswarm','Striga','Besny havko',
+             'Creepy doll','Axe murderer','Norman Bates','Starving servant',
+             'Desperate tester','Gelatinous cube','Constrictor vine',
+             'Debilitating devil','Promiscuous python','Flying falchion',
+             'Mysterious mist','Generic villain'
+            ]
+
 class Container:
 #container can be filled with items, trapped, hiding a key and looted by player
     def __init__(self,name):
@@ -285,11 +304,11 @@ class Container:
             print('\n' + self.name + ' contains:\n')
             for item in self.contents:
                 if 'key' in item:
-                    print ('  ' + item, 'yellow')
+                    print ('  ' + colored(item, 'yellow'))
                 elif 'Bandage' in item or 'Hardtack' in item or 'Antidote' in item:
-                    print ('  ' + item, 'blue')
+                    print ('  ' + colored(item, 'blue'))
                 elif 'Flashbang' in item or 'Shotgun shell' in item or 'Bullet' in item or 'vial' in item:
-                    print ('  ' + item, 'red')
+                    print ('  ' + colored(item, 'red'))
                 else:
                     print('  ' + item)
         else:
@@ -311,16 +330,12 @@ class Container:
             #is_attacked(self,attacker_name,incoming_hit,incoming_damage)
             #incoming_hit is randrange
             #incoming_dmg is tied to randomly chosen element from dict traps
-            player.is_attacked(random.choice(list(traps.keys())),
-                               random.randrange(10,15), traps[random.choice(list(traps.keys()))])
+            trap = random.choice(list(traps.keys()))
+            print(' * ' + trap + '! *')
+            player.is_attacked(trap, random.randrange(10,15), traps[trap])
             if not player.alive:
                 player.in_room, player.in_house = 0,0
 
-    def hides_key(self):
-        if random.randrange(1,100) < 20 and len(key_types)!=0:
-            type_of_key = random.choice(key_types)
-            self.contents.append(type_of_key)
-            key_types.remove(type_of_key)
 
             
 class Location:
@@ -361,6 +376,8 @@ class Location:
     you can almost hear a happy couple laughing together. Suddenly, the 
     space around you seems a little less grim.
                             ''')
+                backpack.remove('Severed head of lady Durst')
+                backpack.remove('Remains of Catherine Durst')
             else:
                 print('\n    It seems you are missing a crucial item here.')
 
@@ -376,6 +393,8 @@ class Location:
     and slowly fades away. Suddenly, several more rays of sunshine find their way into
     the house.
                             ''')
+                backpack.remove('Photograph of Benjamin Durst')
+                backpack.remove('Brown teddy bear')
             else:
                 print('\n    It seems you are missing a crucial item here.')
         
@@ -393,8 +412,6 @@ class Location:
     on various parts of its body. At first glance, its threatening presence 
     shocks you. But examining it further, you see sadness and an unspoken
     plea for help in its eyes. The cage is sealed with heavy chains.
-
-    It seems you are missing a crucial item here.         
             ''')
             if 'Crowbar' in backpack.contents and 'Appetizing thighbone' in backpack.contents:
                 self.solved = 1
@@ -406,22 +423,17 @@ class Location:
     However, it nods at you in a distinctly human-like manner, expressing gratitude.
     Then it bolts out of the storage room towards the front door. 
                 ''')
+                backpack.remove('Appetizing thighbone')
             elif 'Crowbar' in backpack.contents and not 'Appetizing thighbone' in backpack.contents:
                 print('''
     You realize you could free the beast using your crowbar. However, it would be 
     extremely dangerous to approach the cage with the starving beast still inside.
     You are still missing a crucial item here.            
                 ''')
+            else:
+                print('\n    It seems you are missing a crucial item here.')
 
     def has_enemy(self):    
-        creatures = ['Groggy ghost','Blob of goo','Ghastly ghoul','Poltergeist',
-                     'Panting pirate','Sad vampire','Lidless eye','Moaning monster',
-                     'Chucking woodchuck','Batswarm','Striga','Besny havko',
-                     'Creepy doll','Axe murderer','Norman Bates','Starving servant',
-                     'Desperate tester','Gelatinous cube','Constrictor vine',
-                     'Debilitating devil','Promiscuous python','Flying falchion',
-                     'Mysterious mist','Generic villain'
-                    ]
         creature = random.choice(creatures)
         if creature != 'Generic villain':
              creatures.remove(creature)
@@ -441,25 +453,21 @@ class Location:
         self.conts_abb += ['b','r','e']
         try:
             self.container0 = Container(self.containers[0])
-            self.container0.hides_key()
             for item in item_dic[self.containers[0]]:
                 self.container0.add(item)        
         except IndexError: pass
         try:
             self.container1 = Container(self.containers[1])
-            self.container1.hides_key()
             for item in item_dic[self.containers[1]]:
                 self.container1.add(item)
         except IndexError: pass
         try:
             self.container2 = Container(self.containers[2])
-            self.container2.hides_key()
             for item in item_dic[self.containers[2]]:
                 self.container2.add(item)
         except IndexError: pass
         try:
             self.container3 = Container(self.containers[3])
-            self.container3.hides_key()
             for item in item_dic[self.containers[3]]:
                 self.container3.add(item)
         except IndexError: pass    
@@ -539,13 +547,13 @@ class Location:
                 print(room_exit_line)
                 player.in_room = 0
                 if player.condition == 'Poisoned':
-                    print('\n    A toxin coursing through your body takes its toll. You feel your life energy draining.','red')
+                    print(colored('\n    A toxin coursing through your body takes its toll. You feel your life energy draining.','red'))
                     player.HP -= 3
                     if player.HP <= 0:
-                        print (' * ' + self.name + ', you succumb to the toxic substance coursing in your veins. *')
+                        print (' * ' + player.name + ', you succumb to the toxic substance coursing in your veins. *')
                         player.alive = False
                         player.in_house = 0
-            if room_choice == 'e':
+            if room_choice[0] == 'e':
                 player.in_room, player.in_house = 0,0
                 print('    Smart. You left the house. Fresh air caresses your face once again.')       
                 
@@ -580,14 +588,18 @@ def combat(player,monster):
                 player.checks_usables()
                 if player.has_usables:
                     player.uses_item()
-                    if monster.stunned:
-                        monster.is_attacked(11,random.randint(weapon_arsenal[player.weapon][0],weapon_arsenal[player.weapon][1]))
-                        monster.stunned = 0
+                if not player.alive:
+                    player.fighting, player.in_house = 0,0
+                elif monster.stunned:
+                    #a stunned monster can't fight back, so the player gets a free attack
+                    monster.is_attacked(11,random.randint(weapon_arsenal[player.weapon][0],weapon_arsenal[player.weapon][1]))
+                    monster.stunned = 0
                     if player.weapon == 'Shotgun': player.fires_shotgun()
                     elif player.weapon == 'Revolver pistol': player.fires_pistol()
                     if not monster.alive:
                         player.fighting = 0
                 else:
+                    #using an item takes your turn, so the monster strikes
                     player.is_attacked(monster.name,random.randint(5,15),random.randint(2,10))
                     if not player.alive:
                         player.fighting, player.in_house = 0,0
@@ -602,6 +614,8 @@ def combat(player,monster):
                 elif player.weapon == 'Revolver pistol': player.fires_pistol()
                 if not monster.alive:
                     player.fighting = 0
+    if not monster.alive:
+        player.kills += 1
     return player, monster    
 
 #LOCATIONS ARE DEFINED HERE
@@ -913,7 +927,7 @@ masterPlan = {
     },
     'Safe':{
         'VARIABLE': '',
-        'POSITION': 'house.secondFloor[5][6]',
+        'POSITION': 'house.secondFloor[4][6]',
         'DESCRIPTION': '''
     You open all the locks and enter. The safe looks really impressive. Two display cases
     stand at the east and the west wall, you see a huge treasure chest and something 
@@ -955,10 +969,9 @@ masterPlan['Short hallway']['VARIABLE'] = shortHallway
 shortHallway.what_in_room({'Ornate picture frame':['Photograph of Benjamin Durst'],
                         })
 laboratory = Location('Laboratory')
-masterPlan['Laboratory']['Variable'] = laboratory
+masterPlan['Laboratory']['VARIABLE'] = laboratory
 laboratory.what_in_room({'Wooden box':['Bandage'],
                     'Leather case':['Mysterious glass vial','Antidote','Bandage'],
-                    'Toolbox':['Crowbar','Screwdriver'],
                     'Shelf':['Aged wine','Potion']
                         })
 secretStairs = Location('Secret stairs')
@@ -969,7 +982,8 @@ kitchen = Location('Kitchen')
 masterPlan['Kitchen']['VARIABLE'] = kitchen
 kitchen.what_in_room({'Shabby cupboard':['Bandage','Worm-ridden bag of flour'],
                 'Wooden box':['Sack of turnips','Bunch of carrots'],
-                'Kitchen counter':['Severed head of lady Durst']
+                'Kitchen counter':['Severed head of lady Durst'],
+                'Toolbox':['Crowbar','Screwdriver']
                 })
 longHallway = Location('Long hallway')
 masterPlan['Long hallway']['VARIABLE'] = longHallway
@@ -1052,15 +1066,26 @@ safe.what_in_room({'Glass display case':['Strange clockwork device'],
                 'Stone coffin':['Remains of Catherine Durst','Blood-soaked handkerchief']
                 }) 
 
-#GAMEPLAY STARS HERE
-'''
-speech = 'Barry the Butler says: "Welcome to the haunted house.'
-sys.stdout(speech)
-for char in speech:
-    sys.stdout.write(char)
-    sys.stdout.flush()
-    time.sleep(0.05)
-'''
+#KEYS ARE HIDDEN HERE
+#all four keys are always placed, each in a different random container
+#rooms behind the vault door are excluded so the keys can always be found
+def hide_keys():
+    candidates = []
+    for room_name, room in masterPlan.items():
+        if room_name in ['Vault','Safe']:
+            continue
+        location = room['VARIABLE']
+        for container in [location.container0, location.container1,
+                          location.container2, location.container3]:
+            if isinstance(container, Container):
+                candidates.append(container)
+    for type_of_key, container in zip(key_types, random.sample(candidates, len(key_types))):
+        container.add(type_of_key)
+
+hide_keys()
+
+
+#GAMEPLAY STARTS HERE
 print('Barry the Butler says: "Welcome to the haunted house."')
 print('Barry the Butler says: "How would you like to be addressed?."')
 player_name = input()
@@ -1092,29 +1117,54 @@ while player.in_house and player.alive:
             monster = masterPlan[player.location]['VARIABLE'].has_enemy()
             player,monster = combat(player,monster) 
 
-if not player.in_house:
-    if not player.alive:
-        print('\n    The house claimed your soul. The treasures remain lost.')
-    elif len(backpack.contents) > 1:
-        print('\n    You escaped with the following treasure:/n')
-        for item in backpack.contents:
-            if item == 'PST: Personal Statistics Tracker':
-                continue
-            else:
-                print('  ' + item)
+#GAME OVER IS HANDLED HERE
+#runs after every ending - death, escape or leaving through the front door
+def shows_final_stats():
+    treasures = [item for item in backpack.contents if item != 'PST: Personal Statistics Tracker']
+    if player.alive:
+        outcome = 'Escaped the house'
     else:
-        print('\n    Unfortunately, you got out empty-handed.')
+        outcome = 'Perished in the house'
+    print('\n    ==================== FINAL STATS ====================')
+    print('    Name:              ' + player.name)
+    print('    Outcome:           ' + outcome)
+    print('    Health:            ' + str(max(player.HP, 0)) + '/' + str(player.maxHP))
+    print('    Condition:         ' + player.condition)
+    print('    Monsters defeated: ' + str(player.kills))
+    print('    Keys found:        ' + str(player.number_of_keys) + '/4')
+    print('    Good deeds:        ' + str(player.deeds) + '/3')
+    print('    Items collected:   ' + str(len(treasures)))
+    print('    Bullets left:      ' + str(player.bullets) + ' | Shotgun shells left: ' + str(player.shells))
+    print('    =====================================================')
 
-    if player.deeds == 0:
-        print('\n    ' + player.name + ', you accomplished no good deeds in the house.') 
-        print('    There was more to be done, but who said it was your job...')
-    elif player.deeds > 0 and player.deeds < 3:
-        print('\n    Good deeds accomplished: ' + str(player.deeds) + '.')
-        print("    " + player.name + ", the haunted house is still a restless place, but your visit won't be forgotten.")
-    elif player.deeds == 3:
-        print('\n    Congratulations, ' + player.name + '!')
-        print('''
+print('\n                               #############')
+print('                               # GAME OVER #')
+print('                               #############')
+if not player.alive:
+    print('\n    The house claimed your soul. The treasures remain lost.')
+elif len(backpack.contents) > 1:
+    print('\n    You escaped with the following treasure:\n')
+    for item in backpack.contents:
+        if item == 'PST: Personal Statistics Tracker':
+            continue
+        else:
+            print('  ' + item)
+else:
+    print('\n    Unfortunately, you got out empty-handed.')
+
+if player.deeds == 0:
+    print('\n    ' + player.name + ', you accomplished no good deeds in the house.') 
+    print('    There was more to be done, but who said it was your job...')
+elif player.deeds > 0 and player.deeds < 3:
+    print('\n    Good deeds accomplished: ' + str(player.deeds) + '.')
+    print("    " + player.name + ", the haunted house is still a restless place, but your visit won't be forgotten.")
+elif player.deeds == 3:
+    print('\n    Congratulations, ' + player.name + '!')
+    print('''
     You proved hope always prevails. You reunited the lady and lord Durst,
     honored the memory of a troubled child and freed a tortured spirit from its cage.
     Thanks to you, the haunted house will rest in peace. 
     ''')
+
+shows_final_stats()
+input('\n    Press Enter to leave the haunted house...')
