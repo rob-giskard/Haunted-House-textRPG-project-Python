@@ -1,19 +1,17 @@
 """Autoplay for Haunted House.
 
-Runs HauntedHouse.py and types the commands from a walkthrough file for you.
+Plays the game and types the commands from a walkthrough file for you.
 The walkthrough's "seed:" line fixes the game's dice, so the same commands
 always lead to the same game. When the commands run out you get control back.
 
 Usage:
     python autoplay.py [walkthrough.txt] [--delay SECONDS] [--fast] [--game PATH]
 
+--game points at HauntedHouse.py; the haunted_house package next to it is used.
 HauntedHouseAutoplay.exe runs this same script.
 """
 import argparse
-import builtins
 import os
-import random
-import runpy
 import sys
 import time
 
@@ -26,7 +24,7 @@ def read_walkthrough(path):
     seed = None
     commands = []
     with open(path, encoding='utf-8') as f:
-        for number, line in enumerate(f, 1):
+        for line in f:
             text = line.split('#', 1)[0].strip()
             if not text:
                 continue
@@ -54,37 +52,37 @@ def main():
         if not os.path.isfile(path):
             sys.exit('[autoplay] File not found: ' + path)
 
+    # use the game package that sits next to HauntedHouse.py
+    sys.path.insert(0, os.path.dirname(os.path.abspath(args.game)))
+    from haunted_house.game import Game
+    from haunted_house.ui import ConsoleUI
+
     seed, commands = read_walkthrough(args.walkthrough)
     print(GREY + '[autoplay] ' + os.path.basename(args.walkthrough) + ': seed ' + str(seed)
           + ', ' + str(len(commands)) + ' commands. Press Ctrl+C to stop.' + RESET + '\n')
 
-    real_input = builtins.input
-    remaining = iter(commands)
-    state = {'auto': True}
+    class AutoplayUI(ConsoleUI):
+        """Types the walkthrough's commands, then hands control to the player."""
 
-    def auto_input(prompt=''):
-        if state['auto']:
-            try:
-                command = next(remaining)
-            except StopIteration:
-                state['auto'] = False
-                print(GREY + '\n[autoplay] Walkthrough finished - you have control now.' + RESET)
-                return real_input(prompt)
+        def __init__(self):
+            self.remaining = list(commands)
+
+        def ask(self, prompt=''):
+            if not self.remaining:
+                if self.remaining is not None:
+                    self.remaining = None
+                    print(GREY + '\n[autoplay] Walkthrough finished - you have control now.' + RESET)
+                return input(prompt)
+            command = self.remaining.pop(0)
             sys.stdout.write(prompt)
             sys.stdout.flush()
             time.sleep(delay)
             print(GREEN + '> ' + command + RESET)
             time.sleep(delay)
             return command
-        return real_input(prompt)
 
-    builtins.input = auto_input
-    random.seed(seed)
-    game = os.path.abspath(args.game)
-    os.chdir(os.path.dirname(game))
-    sys.argv = [game]
     try:
-        runpy.run_path(game, run_name='__main__')
+        Game(ui=AutoplayUI(), seed=seed).run()
     except KeyboardInterrupt:
         print(GREY + '\n[autoplay] Stopped.' + RESET)
 
