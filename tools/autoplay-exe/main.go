@@ -5,7 +5,7 @@
 // which it looks for next to the exe. Any arguments are passed on to autoplay.py
 // (for example: --fast, --delay 1, or a different walkthrough file).
 //
-// Build (from this folder):  GOOS=windows GOARCH=amd64 go build -o ../../HauntedHouseAutoplay.exe
+// Build with build.sh in this folder; it copies the current autoplay.py in first.
 package main
 
 import (

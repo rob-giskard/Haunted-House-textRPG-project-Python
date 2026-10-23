@@ -1,0 +1,3 @@
+sep=;
+date;time;python;system;result;tests_run;passed;failed;errors;skipped;duration_s;failing_tests;games_simulated;first_seed;completed_100pct;completion_rate_pct;survived;died;killed_by_monsters;killed_by_traps;killed_by_poison;deadliest_thing;deadliest_thing_kills;most_met_monster;monsters_fought;monsters_defeated;traps_triggered;damage_taken_total;avg_damage_per_game;avg_commands_per_game;fastest_100pct_commands;fastest_100pct_seed;luckiest_seed;luckiest_seed_hp;quickest_death_commands;quickest_death_seed;quickest_death_by;treasure_items_carried_out
+2026-10-23;18:00:51;3.7.9;Windows;PASS;75;75;0;0;0;3;;200;747038;33;16;33;167;36;110;21;Explosion;70;Poltergeist;1294;1258;3764;22198;111;132;178;747190;747229;33;14;747133;Explosion;1681

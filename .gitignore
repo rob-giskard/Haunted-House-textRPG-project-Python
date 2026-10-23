@@ -1,7 +1,11 @@
 # Standalone game exe - build it with tools/game-exe/build.sh
 /HauntedHouse.exe
 tools/game-exe/runtime.zip
-tools/game-exe/HauntedHouse.py
+tools/game-exe/game.zip
 
 # Python
 __pycache__/
+
+# Autoplay exe - build it with tools/autoplay-exe/build.sh
+/HauntedHouseAutoplay.exe
+tools/autoplay-exe/autoplay.py

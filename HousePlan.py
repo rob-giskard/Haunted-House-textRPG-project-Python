@@ -1,35 +1,25 @@
+"""Draws an ASCII floor plan of both floors of the house.
+
+Room positions and labels come from haunted_house/data.py, so the plan always
+matches the house the game actually uses. Run it with: python HousePlan.py
+"""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from haunted_house import data
+
+
 class House:
     def __init__(self):
         self.firstFloor = [["     " for i in range(7)] for j in range(7)]
         self.secondFloor = [["     " for i in range(7)] for j in range(7)]
         self.firstFloor[0][0] = 'Flor1'
-        self.firstFloor[6][3] = 'Foyer'
-        self.firstFloor[5][3] = 'GrHal'
-        self.firstFloor[5][2] = 'DrawR'
-        self.firstFloor[5][1] = 'BallR'
-        self.firstFloor[4][3] = 'ShHal'
-        self.firstFloor[4][4] = 'Lab  '
-        self.firstFloor[4][5] = 'SecSt'
-        self.firstFloor[3][3] = 'Kitch'
-        self.firstFloor[2][3] = 'LoHal'
-        self.firstFloor[2][2] = 'Storg'
-        self.firstFloor[2][4] = 'Stair'
-                
         self.secondFloor[0][0] = 'Flor2'
-        self.secondFloor[3][4] = 'MoHal'
-        self.secondFloor[4][4] = 'GalNE'
-        self.secondFloor[5][4] = 'GalE '
-        self.secondFloor[6][4] = 'GalSE'
-        self.secondFloor[6][3] = 'GalS '
-        self.secondFloor[6][2] = 'GalSW'
-        self.secondFloor[5][1] = 'MstrB'
-        self.secondFloor[5][2] = 'GalW '
-        self.secondFloor[4][2] = 'GalNW'
-        self.secondFloor[4][3] = 'GalN '
-        self.secondFloor[3][2] = 'ChldB'
-        self.secondFloor[5][5] = 'Study'
-        self.secondFloor[5][6] = 'Vault'
-        self.secondFloor[4][6] = 'Safe '
+        for room in data.ROOMS.values():
+            floor, row, col = room['position']
+            grid = self.firstFloor if floor == 1 else self.secondFloor
+            grid[row][col] = room['map_code'].ljust(5)
 
     def drawFloor1(self):
         blueprint1 = "-----------------------------------------------------------------------\n"
@@ -50,7 +40,7 @@ class House:
         return blueprint2
 
 
-house = House()
-print(house.drawFloor1())
-print(house.drawFloor2())
-
+if __name__ == '__main__':
+    house = House()
+    print(house.drawFloor1())
+    print(house.drawFloor2())

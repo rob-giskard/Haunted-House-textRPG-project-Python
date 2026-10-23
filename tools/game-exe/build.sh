@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds HauntedHouse.exe (standalone, with its own Python) in the repo root.
 # Needs: bash, curl, tar, Go and Python. On Windows, run it from Git Bash.
-# Run it again whenever HauntedHouse.py changes.
+# Run it again whenever the game code changes.
 set -euo pipefail
 cd "$(dirname "$0")"
 here=$(pwd)
@@ -29,7 +29,9 @@ cd "$work"
 cd "$here"
 
 cp "$work/runtime.zip" runtime.zip
-cp ../../HauntedHouse.py HauntedHouse.py
+echo "Packing the game..."
+rm -f game.zip
+(cd ../.. && "$PY" -c "import zipfile, glob; z = zipfile.ZipFile('tools/game-exe/game.zip', 'w', zipfile.ZIP_DEFLATED); [z.write(f) for f in ['HauntedHouse.py'] + sorted(glob.glob('haunted_house/*.py'))]; z.close()")
 echo "Building HauntedHouse.exe..."
 GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o ../../HauntedHouse.exe .
 echo "Done: $(cd ../.. && pwd)/HauntedHouse.exe"
