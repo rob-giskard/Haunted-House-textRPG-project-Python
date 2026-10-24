@@ -3,7 +3,7 @@
 Usage:
     python run_tests.py                     all tests, 200 simulated bot games
     python run_tests.py --games 1000        more simulated games (more fun statistics)
-    python run_tests.py --quick             skip the slower tests (simulation and entry points)
+    python run_tests.py --quick             skip the slower tests (simulation, entry points, window)
     python run_tests.py --seed 12345        replay the simulated games of an earlier run
     python run_tests.py --update-snapshots  accept on-purpose changes to the game's text/behaviour
 
@@ -115,7 +115,7 @@ def count_runs():
 def main():
     parser = argparse.ArgumentParser(description='Run the Haunted House tests.')
     parser.add_argument('--games', type=int, default=200, help='simulated bot games (default 200)')
-    parser.add_argument('--quick', action='store_true', help='skip the simulation and entry-point tests')
+    parser.add_argument('--quick', action='store_true', help='skip the simulation, entry-point and window tests')
     parser.add_argument('--seed', type=int, default=0, help='first seed of the simulated games')
     parser.add_argument('--update-snapshots', action='store_true', help='accept on-purpose game changes')
     parser.add_argument('--no-sheet', action='store_true', help="don't append to the statistics sheet")
@@ -141,7 +141,7 @@ def main():
         for group in suite:
             for case_group in group:
                 for test in getattr(case_group, '_tests', [case_group]):
-                    if not any(slow in test.id() for slow in ('test_simulation', 'test_entry_points')):
+                    if not any(slow in test.id() for slow in ('test_simulation', 'test_entry_points', 'TestWindow')):
                         quick.addTest(test)
         suite = quick
 

@@ -2,6 +2,48 @@
 
 All notable changes to Haunted House, newest first. Each section matches one step of the work.
 
+## Step 7 - The window is the game
+
+- The console version is gone. `python HauntedHouse.py` (and `HauntedHouse.exe`) open the game window.
+  `HauntedHouseGUI.pyw` was merged into `HauntedHouse.py`; `ConsoleUI` was removed from `ui.py`, and
+  `Game` now always gets its UI passed in.
+- Autoplay moved into the window: the **[ watch walkthrough ]** button, or `HauntedHouse.py --autoplay
+  [file] [--delay seconds]`, replays the walkthrough by typing each command for you. Esc takes over.
+  `autoplay.py` and the separate autoplay exe (`tools/autoplay-exe/`) were removed.
+- New **[ new game ]** button. Starting a new game stops the old one cleanly.
+- If something goes wrong inside the game, the error is shown in the terminal instead of the game
+  silently freezing.
+- New `haunted_house/walkthrough.py` reads walkthrough files (used by the window and the tests).
+- `colors.py` no longer runs `os.system('')`, which was only needed for the console and would flash a
+  console window when starting without one.
+- **The exe build** (`tools/game-exe/build.sh`):
+  - keeps tkinter in the bundled Python (dropping only Tcl/Tk extras: Tix, demos, time zones, build files)
+  - builds a windowed exe (`-H windowsgui`) that starts the game with `pythonw.exe`, so no console window opens
+  - bundles `walkthrough.txt`, so autoplay works from the exe too
+  - passes arguments on to the game (`HauntedHouse.exe --autoplay`)
+  - shows start-up problems in a Windows message box (`errors_windows.go`)
+  - the exe grows from about 10 MB to 13 MB
+- Tests updated: the entry-point tests check the command-line options, and the window tests now also
+  run autoplay and the new-game button. The bridge tests cover stopping a game and reporting errors.
+
+## Step 6 - Graphical interface
+
+- New `HauntedHouseGUI.pyw`: the game in a window with a terminal look. The game screen is on top,
+  the terminal you type into below it:
+  - **Room** panel: name, description and the objects to search (searched ones greyed out)
+  - **Exits** compass: the four directions, colored by open / locked / openable now / wall; click to move
+  - **Gear** panel: weapon and ammo, usable items with counts, keys, good deeds, defeated monsters, treasure
+  - **Combat** panel: the monster's and your health bars, the round and the last moves; afterwards how it ended
+  - **Header**: your name, health bar and condition
+  - **Terminal**: everything the game says, with its colors; a hint line shows the letters that work right now;
+    Up/Down recalls earlier commands; Enter after the game ends starts a new one
+- `haunted_house/gui.py` (the window, tkinter) and `haunted_house/gui_state.py` (panel contents, the bridge
+  to the game thread and the hints, testable without a window). The game code is unchanged: it runs in a
+  background thread and talks to the window through `GuiBridge`.
+- `data.LOCKED_DOORS` lists which doors are locked and what opens them, for the exits panel.
+- New `tests/test_gui.py` (15 tests), including the walkthrough played through a hidden window.
+- Works with Python 3.7 and newer.
+
 ## Step 5 - Tests and the statistics sheet
 
 - New `tests/` folder with 75 tests (standard library only), run with `python run_tests.py`

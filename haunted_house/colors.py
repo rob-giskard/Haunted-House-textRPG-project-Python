@@ -1,8 +1,8 @@
-"""Terminal colors (ANSI codes)."""
-import os
+"""Text colors.
 
-# os.system('') switches on ANSI color support in the classic Windows console
-os.system('')
+The game marks colored text with ANSI color codes (the same codes a terminal understands).
+The window turns them into real colors when it shows the text.
+"""
 
 COLORS = {'yellow': '\033[93m', 'blue': '\033[94m', 'red': '\033[91m'}
 

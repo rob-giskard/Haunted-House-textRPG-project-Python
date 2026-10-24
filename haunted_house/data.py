@@ -347,6 +347,10 @@ PLAYER_AC = 12
 STARTING_BULLETS = 6
 STARTING_SHELLS = 0
 
+# LOCKED DOORS - rooms that need something before you can enter them
+# (the rules themselves live in Player.moves; the graphical interface uses this to show locks)
+LOCKED_DOORS = {'Laboratory': 'Crowbar', 'Ball room': 'Crowbar', 'Safe': 'keys'}
+
 # KEYS - all four are hidden in random containers at the start of every game
 KEY_TYPES = ['Brass key', 'Silver key', 'Copper key', 'Iron key']
 KEYS_NEEDED = 4
