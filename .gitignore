@@ -5,7 +5,3 @@ tools/game-exe/game.zip
 
 # Python
 __pycache__/
-
-# Autoplay exe - build it with tools/autoplay-exe/build.sh
-/HauntedHouseAutoplay.exe
-tools/autoplay-exe/autoplay.py

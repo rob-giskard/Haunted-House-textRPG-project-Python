@@ -5,19 +5,54 @@ Defeat monsters, loot treasures and collect keys to advance.
 
 ## How to run
 
-You need Python 3 and nothing else (only the standard library is used).
+**Easiest:** double-click **`HauntedHouse.exe`**. It is a standalone Windows program that needs
+nothing installed (it carries its own Python). It is not stored in git, so build it once with
+`tools/game-exe/build.sh` (see *Building the exe*). The first start takes a few seconds while it
+unpacks into `%LOCALAPPDATA%\HauntedHouse`; after that it starts right away.
+
+**With Python 3:**
 
 ```
 python HauntedHouse.py
 ```
 
-Or build **`HauntedHouse.exe`**, a standalone Windows version that needs nothing installed
-(it carries its own Python). It is not committed to git, so build it yourself with
-`tools/game-exe/build.sh` (see *Building the exes*). The first start takes a few seconds
-while it unpacks Python into `%LOCALAPPDATA%\HauntedHouse`; after that it starts instantly.
+Only the standard library is used, including tkinter for the window (part of the standard
+Python installer for Windows).
 
-Item colors use ANSI codes. They work in Windows Terminal, the classic Windows console,
-macOS and Linux terminals.
+## The game window
+
+The game is played in a window that keeps the terminal look: the game screen is on top and
+the terminal you type into is below it.
+
+```
++------------------------------------------------------------------+
+| HAUNTED HOUSE  [new game] [watch walkthrough]   Ghost Hunter  HP  |
++--------------------------------------+---------------------------+
+| ROOM    name and description,        | EXITS   the four          |
+|         objects to search            |         directions        |
+|         (searched ones greyed out)   +---------------------------+
+|                                      | GEAR    weapon, ammo,     |
+|                                      |         items, keys, deeds|
++--------------------------------------+---------------------------+
+| COMBAT  the monster and your health bars, round, the last moves    |
++------------------------------------------------------------------+
+| terminal: everything the game says                                |
+| hint: what you can type right now                                 |
+| > your command                                                    |
++------------------------------------------------------------------+
+```
+
+- **Exits** are colored: green = open, yellow = locked but you can open it now, red = locked
+  (the label says what you need), blue = the front door, grey = wall or railing.
+  When the game asks for a direction you can also click an exit.
+- **Gear** shows your weapon and ammo, usable items (blue heals, red is for combat), the four
+  keys and your good deeds, defeated monsters and treasure count.
+- **Combat** appears when a monster attacks: both health bars, the round and the last moves.
+  After the fight it shows how it ended.
+- The **hint line** above the input lists the letters that work right now.
+- Up/Down in the input recalls earlier commands. After the game ends, Enter starts a new one.
+- **[ new game ]** starts over at any time; **[ watch walkthrough ]** replays the 100% walkthrough
+  (see *Autoplay* below).
 
 ## Controls
 
@@ -133,27 +168,22 @@ The game is random, so the walkthrough starts with a `seed:` line that fixes the
 The same seed plus the same commands always gives the same game. Typing the commands
 into a normal game won't work, because that game rolls different dice.
 
-To watch it play, run `python autoplay.py`, or double-click **`HauntedHouseAutoplay.exe`**
-(build it with `tools/autoplay-exe/build.sh`; it is not stored in git). It types each command
-for you and hands control back at the end. The exe needs Python 3 installed and looks for
-`HauntedHouse.py`, the `haunted_house` folder and `walkthrough.txt` next to itself. From a terminal you can also
-change the speed or use another walkthrough:
+To watch it, click **[ watch walkthrough ]** in the window. It types each command into the input
+for you; press **Esc** at any moment to take over, and you get control back at the end anyway.
+It also works from the command line, with an optional speed or another walkthrough file:
 
 ```
-HauntedHouseAutoplay.exe --fast
-HauntedHouseAutoplay.exe --delay 1
-HauntedHouseAutoplay.exe my_walkthrough.txt
-python autoplay.py --fast          (same tool without the exe)
+python HauntedHouse.py --autoplay
+python HauntedHouse.py --autoplay my_walkthrough.txt --delay 1
+HauntedHouse.exe --autoplay
 ```
 
 Walkthrough format: one command per line, `#` starts a comment, and one `seed: N` line.
+The exe carries its own copy of `walkthrough.txt`.
 
 > **Note:** the walkthrough matches the current version of the game. Any change that
 > affects the dice or the rooms (new items, containers, monsters...) means it has to be
-> regenerated.
-
-Windows may show a SmartScreen warning the first time, because the exe isn't signed.
-Choose *More info → Run anyway*, or use `python autoplay.py` instead.
+> regenerated (the walkthrough test tells you).
 
 ## The house
 
@@ -217,7 +247,7 @@ lead down south into the Moldy hallway, and the **Secret stairs** lead east into
 ## Project structure
 
 ```
-HauntedHouse.py          start the game here
+HauntedHouse.py          start the game here (opens the window; --autoplay replays the walkthrough)
 haunted_house/           the game itself
     data.py              all game content: rooms, objects, items, creatures, weapons, traps
     game.py              Game class: sets up a fresh house, main loop, ending and final stats
@@ -225,29 +255,33 @@ haunted_house/           the game itself
     world.py             Location (rooms) and Container (objects and the backpack)
     events.py            special room events: the good deeds and the poison
     combat.py            ambushes and fights
-    ui.py                how the game talks to the player (console, scripted, ...)
-    colors.py            terminal colors
-HousePlan.py             draws the floor plan from data.py
-autoplay.py              plays the game from a walkthrough file
+    ui.py                how the game talks to whatever shows it (the window, or tests)
+    gui.py               the window (tkinter): panels, terminal and input
+    gui_state.py         the window's logic without tkinter: panel contents, the bridge to
+                         the game thread, the hint line
+    walkthrough.py       reads walkthrough files
+    colors.py            text colors
+HousePlan.py             prints the floor plan from data.py (a developer tool)
 walkthrough.txt          seeded command list that completes 100% of the game
 run_tests.py             runs all tests and appends the results to the statistics sheet
 run_tests.bat            the same, by double-clicking on Windows
 tests/                   the tests (see Testing below)
 tools/game-exe/          builds HauntedHouse.exe (standalone, Python bundled)
-tools/autoplay-exe/      builds HauntedHouseAutoplay.exe
 CHANGELOG.md             what changed, step by step
 ```
 
 ### How the code fits together
 
-`HauntedHouse.py` creates a `Game` and runs it. The `Game` object holds everything one
+`HauntedHouse.py` opens the window, which creates a `Game` and runs it. The `Game` object holds everything one
 playthrough needs: the player, the backpack, the rooms, the creatures that haven't appeared
 yet and the doors that have been opened. There are no global variables.
 
 The game never calls `print()` or `input()` itself. It uses a UI object with two methods,
-`show(text)` and `ask(prompt)`. `ConsoleUI` plays in the terminal; the tests use `ScriptedUI`
-to play a list of commands and read back everything the game showed; autoplay has its own UI
-that types the walkthrough. A graphical interface will be another UI with the same two methods.
+`show(text)` and `ask(prompt)`. The window uses `GuiBridge`: the game runs in a background
+thread, the bridge passes everything it shows to the window through a queue together with a
+snapshot of the game state for the panels, and waits for the player's answer. The tests use
+`ScriptedUI` to play a list of commands and read back everything the game showed. Colored text
+is marked with ANSI color codes, which the window turns into colors.
 
 ```python
 from haunted_house.game import Game
@@ -261,15 +295,17 @@ print(ui.text())
 To add content (a room, an item, a creature), edit `haunted_house/data.py`; the comments there
 explain the format. Then run the tests.
 
-### Building the exes
+### Building the exe
 
-Both exes are git-ignored; build them when you need them (needs Go; on Windows use Git Bash):
+`HauntedHouse.exe` is git-ignored; build it when you need it with `tools/game-exe/build.sh`
+(needs Go, curl and Python; on Windows run it from Git Bash). It downloads a portable Windows
+Python, trims what the game doesn't use (keeping tkinter for the window), bundles it with the
+current game files and `walkthrough.txt`, and builds a windowed exe: no console opens next to
+the game. Rebuild it after every game change. Arguments are passed on to the game
+(`HauntedHouse.exe --autoplay`). If something goes wrong at start-up, a message box explains it.
 
-- `tools/game-exe/build.sh` → `HauntedHouse.exe`: downloads a portable Windows Python, trims it,
-  bundles it with the current game files and builds the exe (also needs curl and Python).
-  Rebuild after every game change.
-- `tools/autoplay-exe/build.sh` → `HauntedHouseAutoplay.exe`: copies the current `autoplay.py`
-  in and builds the exe.
+Windows may show a SmartScreen warning the first time, because the exe isn't signed.
+Choose *More info → Run anyway*.
 
 ## Testing
 
@@ -291,12 +327,13 @@ also work with `python -m unittest discover -s tests` or pytest).
 | `test_walkthrough.py` | `walkthrough.txt` still completes 100% of the game |
 | `test_snapshots.py` | 60 recorded games still play out with exactly the same text |
 | `test_simulation.py` | a bot plays 200 new random games per run and nothing ever breaks |
-| `test_entry_points.py` | `HauntedHouse.py`, `autoplay.py` and `HousePlan.py` start and finish as real programs |
+| `test_gui.py` | the window: panel contents (rooms, exits and locks, items), the bridge to the game thread (stopping games, reporting errors), combat tracking, hints, and hidden windows that play the walkthrough, run autoplay and start a new game (skipped if there is no display) |
+| `test_entry_points.py` | `HauntedHouse.py` understands its options (`--autoplay`, `--delay`) and `HousePlan.py` runs |
 
 Options:
 
 ```
-python run_tests.py --quick             skip the simulation and entry-point tests
+python run_tests.py --quick             skip the slower tests (simulation, entry points, window)
 python run_tests.py --games 1000        simulate more games
 python run_tests.py --seed 783148       replay the simulated games of an earlier run
 python run_tests.py --update-snapshots  accept an on-purpose change to the game's text or behaviour
@@ -334,10 +371,10 @@ Done:
 1. ~~Move the game content into its own file~~ (`haunted_house/data.py`)
 2. ~~Split the game into modules and remove global variables~~
 3. ~~Put input and output behind an interface~~ (`haunted_house/ui.py`)
+4. ~~Simple graphical interface~~ - now the only way to play
 
-Next:
+Ideas for next:
 
-4. Make the game command-driven: one method that takes a single command and returns what to
-   show, instead of loops that wait inside `ask()`. Graphical interfaces work this way.
-5. Simple graphical interface (tkinter) with a live map built from the room positions,
-   an inventory panel and a stats bar
+- A map panel built from the room positions (`data.py` already has them), showing visited rooms
+- Make the game command-driven (one method that takes a single command and returns what to
+  show) so the window no longer needs a background thread

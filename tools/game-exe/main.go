@@ -1,17 +1,20 @@
 // HauntedHouse.exe - the game as a single, standalone Windows program.
 //
 // The exe carries its own copy of Python (a trimmed python-build-standalone
-// runtime) and the game (HauntedHouse.py plus the haunted_house package).
-// On the first run it unpacks them into %LOCALAPPDATA%\HauntedHouse, then it
-// simply runs the game in this console.
-// Nothing needs to be installed on the player's computer.
+// runtime, with tkinter for the window) and the game: HauntedHouse.py, the
+// haunted_house package and walkthrough.txt. On the first run it unpacks them
+// into %LOCALAPPDATA%\HauntedHouse (this takes a few seconds), then it starts
+// the game window. No console window opens, and nothing needs to be installed.
+//
+// Any arguments are passed on to the game, for example:
+//
+//	HauntedHouse.exe --autoplay
 //
 // Build with build.sh in this folder (see the README).
 package main
 
 import (
 	"archive/zip"
-	"bufio"
 	"bytes"
 	"crypto/sha256"
 	_ "embed"
@@ -22,6 +25,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 //go:embed runtime.zip
@@ -30,14 +34,9 @@ var runtimeZip []byte
 //go:embed game.zip
 var gameZip []byte
 
-func pause() {
-	fmt.Print("\nPress Enter to close...")
-	bufio.NewReader(os.Stdin).ReadString('\n')
-}
-
+// fail shows an error (a message box on Windows, see errors_windows.go) and quits.
 func fail(format string, args ...any) {
-	fmt.Printf(format+"\n", args...)
-	pause()
+	showError(fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
 
@@ -102,10 +101,10 @@ func extract(archive []byte, dir string) {
 	tmp := dir + ".partial"
 	os.RemoveAll(tmp)
 	if err := unpack(archive, tmp); err != nil {
-		fail("Could not unpack the game: %v", err)
+		fail("Could not unpack the game:\n%v", err)
 	}
 	if err := os.Rename(tmp, dir); err != nil {
-		fail("Could not unpack the game: %v", err)
+		fail("Could not unpack the game:\n%v", err)
 	}
 	os.WriteFile(filepath.Join(dir, ".ready"), []byte("ok"), 0o644)
 }
@@ -116,36 +115,35 @@ func main() {
 		cache = os.TempDir()
 	}
 	base := filepath.Join(cache, "HauntedHouse")
-	runtimeDir := filepath.Join(base, "runtime-"+shortHash(runtimeZip))
-	ready := filepath.Join(runtimeDir, ".ready")
 
-	if _, err := os.Stat(ready); err != nil {
-		fmt.Println("Preparing the haunted house (first run only)...")
+	// each Python and game version gets its own folder, so an updated exe never runs old files
+	runtimeDir := filepath.Join(base, "runtime-"+shortHash(runtimeZip))
+	if _, err := os.Stat(filepath.Join(runtimeDir, ".ready")); err != nil {
 		extract(runtimeZip, runtimeDir)
 	}
-
-	// each game version gets its own folder, so an updated exe never runs old files
 	gameDir := filepath.Join(base, "game-"+shortHash(gameZip))
 	if _, err := os.Stat(filepath.Join(gameDir, ".ready")); err != nil {
 		extract(gameZip, gameDir)
 	}
-	game := filepath.Join(gameDir, "HauntedHouse.py")
 
-	python := filepath.Join(runtimeDir, "python", "python.exe")
+	// pythonw.exe runs Python without a console window
+	python := filepath.Join(runtimeDir, "python", "pythonw.exe")
 	if runtime.GOOS != "windows" {
 		python = filepath.Join(runtimeDir, "python", "bin", "python3")
 	}
 
 	// -I: isolated mode, so the player's own Python settings can't interfere
 	// (HauntedHouse.py adds its own folder to the import path, so the package is found)
-	cmd := exec.Command(python, "-I", game)
+	args := append([]string{"-I", filepath.Join(gameDir, "HauntedHouse.py")}, os.Args[1:]...)
+	cmd := exec.Command(python, args...)
 	cmd.Dir = gameDir
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			pause()
-			os.Exit(exitErr.ExitCode())
+		details := strings.TrimSpace(stderr.String())
+		if len(details) > 1500 {
+			details = "..." + details[len(details)-1500:]
 		}
-		fail("Could not start the game: %v", err)
+		fail("The game stopped unexpectedly.\n\n%v\n%s", err, details)
 	}
 }

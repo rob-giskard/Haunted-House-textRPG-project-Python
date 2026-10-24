@@ -4,19 +4,18 @@ import random
 from . import data
 from .combat import ambush, combat
 from .entities import Player
-from .ui import ConsoleUI
 from .world import Container, build_rooms, hide_keys
 
 
 class Game:
     """Everything one playthrough needs, in one place (no global variables).
 
-    ui:   where the game shows text and reads answers (see ui.py); the console by default.
+    ui:   where the game shows text and reads answers (see ui.py): the window, or a ScriptedUI in tests.
     seed: optional number that fixes the dice, so the same inputs give the same game.
     """
 
-    def __init__(self, ui=None, seed=None):
-        self.ui = ui if ui is not None else ConsoleUI()
+    def __init__(self, ui, seed=None):
+        self.ui = ui
         if seed is not None:
             random.seed(seed)
         self.rooms = build_rooms(self.ui)

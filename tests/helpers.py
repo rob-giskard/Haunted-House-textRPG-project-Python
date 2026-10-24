@@ -10,6 +10,7 @@ if ROOT not in sys.path:
 from haunted_house import data                      # noqa: E402
 from haunted_house.game import Game                 # noqa: E402
 from haunted_house.ui import ScriptedUI, UI         # noqa: E402
+from haunted_house.walkthrough import read_walkthrough as _read_walkthrough  # noqa: E402
 
 WALKTHROUGH = os.path.join(ROOT, 'walkthrough.txt')
 DIRECTIONS = {'NORTH': 'n', 'SOUTH': 's', 'EAST': 'e', 'WEST': 'w'}
@@ -33,15 +34,7 @@ def play(commands, seed=1, on_empty=''):
 
 
 def read_walkthrough(path=WALKTHROUGH):
-    seed, commands = None, []
-    with open(path, encoding='utf-8') as f:
-        for line in f:
-            text = line.split('#', 1)[0].strip()
-            if text.lower().startswith('seed:'):
-                seed = int(text.split(':', 1)[1])
-            elif text:
-                commands.append(text)
-    return seed, commands
+    return _read_walkthrough(path)
 
 
 def rooms_visited(transcript_text):

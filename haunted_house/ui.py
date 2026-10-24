@@ -2,7 +2,7 @@
 
 The game never calls print() or input() itself. It calls ui.show() to display text and
 ui.ask() to get the player's answer. Any object with those two methods can run the game:
-the console, the autoplay tool, the tests, and later a graphical interface.
+the window (GuiBridge in gui_state.py) and the tests (ScriptedUI below).
 """
 
 
@@ -16,16 +16,6 @@ class UI:
     def ask(self, prompt=''):
         """Show a prompt and return what the player typed."""
         raise NotImplementedError
-
-
-class ConsoleUI(UI):
-    """Plays the game in a terminal window."""
-
-    def show(self, *parts):
-        print(*parts)
-
-    def ask(self, prompt=''):
-        return input(prompt)
 
 
 class OutOfCommands(Exception):
